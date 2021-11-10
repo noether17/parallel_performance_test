@@ -52,6 +52,7 @@ Various block sizes (multiples of 32)
 Try block sizes smaller than 32 to observe negative impact on performance
 Coalesced memory accesses
 Non-coalesced memory accesses
+Instruction-level parallelism
 Try to throw in example of warp divergence
 
 # Variables to Measure
