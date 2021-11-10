@@ -1,12 +1,15 @@
 #pragma once
 
 #include <chrono>
+#include <numeric>
+#include <thread>
 #include <vector>
 
 namespace AT
 {
 constexpr auto default_block_size = 32; // warp consists of 32 threads
 using ns = std::chrono::nanoseconds;
+using data_type = int;
 
 enum class Algorithm
 {
