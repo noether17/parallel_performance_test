@@ -13,6 +13,11 @@ Fast Fourier Transform
 
 ## Array Sizes
 
+## Data Types
+int
+float
+double
+
 ## Hardware
 ### System 1
 #### CPU
