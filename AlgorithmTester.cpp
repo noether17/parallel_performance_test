@@ -53,7 +53,8 @@ auto test_performance(Algorithm alg,
 
     // Start with CPU implementation for element-wise operations
     // Determine algorithm
-    auto func = parse_algorithm(alg);
+    //auto func = parse_algorithm(alg);
+    auto func; /* = element-wise addition; start with getting this to work */
 
     // create input vector(s)
     auto input_vector = std::vector<data_type>(array_size);
@@ -71,7 +72,7 @@ auto test_performance(Algorithm alg,
     auto thread_index = 0;
     auto thread_offset = array_size / parallelism; // depends on access
     auto stride = 1; // depends on access
-    for (const auto thread& : threads)
+    for (auto thread& : threads)
     {
         thread = std::thread{func,
                              std::ref(output_vector),
@@ -80,7 +81,7 @@ auto test_performance(Algorithm alg,
                              stride};
     }
     // join threads
-    for (const auto thread& : threads)
+    for (auto thread& : threads)
     {
         thread.join();
     }
