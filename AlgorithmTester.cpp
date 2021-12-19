@@ -2,6 +2,28 @@
 
 namespace AT
 {
+auto element_wise_addition(std::vector<data_type>& output_vector,
+                           const std::vector<data_type>& input_vector,
+                           int thread_start,
+                           int stride)
+{
+    for (int i = thread_start; i < input_vector.size(); i += stride)
+    {
+        output_vector[i] += input_vector[i];
+    }
+}
+
+auto element_wise_multiplication(std::vector<data_type>& output_vector,
+                                 const std::vector<data_type>& input_vector,
+                                 int thread_start,
+                                 int stride)
+{
+    for (int i = thread_start; i < input_vector.size(); i += stride)
+    {
+        output_vector[i] *= input_vector[i];
+    }
+}
+
 auto parse_algorithm(Algorithm alg)
     -> void(*)(std::vector<data_type>&,
                const std::vector<data_type>&,
@@ -11,29 +33,9 @@ auto parse_algorithm(Algorithm alg)
     switch (alg)
     {
         case Algorithm::element_wise_addition:
-            return []
-                (std::vector<data_type>& output_vector,
-                 const std::vector<data_type>& input_vector,
-                 int thread_start,
-                 int stride)
-                 {
-                     for (int i = thread_start; i < input_vector.size(); i += stride)
-                     {
-                         output_vector[i] = input_vector[i] + input_vector[i];
-                     }
-                 }
+            return element_wise_addition;
         case Algorithm::element_wise_multiplication:
-            return []
-                (std::vector<data_type>& output_vector,
-                 const std::vector<data_type>& input_vector,
-                 int thread_start,
-                 int stride)
-                 {
-                     for (int i = thread_start; i < input_vector.size(); i += stride)
-                     {
-                         output_vector[i] = input_vector[i] * input_vector[i];
-                     }
-                 }
+            return element_wise_multiplication;
     }
 }
 
@@ -54,7 +56,7 @@ auto test_performance(Algorithm alg,
     // Start with CPU implementation for element-wise operations
     // Determine algorithm
     //auto func = parse_algorithm(alg);
-    auto func; /* = element-wise addition; start with getting this to work */
+    auto func = element_wise_addition; // start with getting this to work
 
     // create input vector(s)
     auto input_vector = std::vector<data_type>(array_size);
