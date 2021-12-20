@@ -58,29 +58,29 @@ auto test_performance(Algorithm alg,
     //auto func = parse_algorithm(alg);
     auto func = element_wise_addition; // start with getting this to work
 
-    // create input vector(s)
+    // create data vectors
     auto input_vector = std::vector<data_type>(array_size);
     std::iota(input_vector.begin(), input_vector.end(), 1);
-
-    // create output vector
     auto output_vector = std::vector<data_type>(array_size);
+    std::iota(output_vector.begin(), output_vector.end(), 1);
 
     // create vector of threads
     auto threads = std::vector<std::thread>(parallelism);
 
+    // set thread boundary parameters
+    auto thread_offset = array_size / parallelism; // depends on access
+    auto stride = 1; // depends on access
+
     // start timer
     auto start = std::chrono::high_resolution_clock::now();
     // start threads
-    auto thread_index = 0;
-    auto thread_offset = array_size / parallelism; // depends on access
-    auto stride = 1; // depends on access
-    for (auto thread& : threads)
+    for (int thread_index = 0; thread_index < threads.size(); ++thread_index)
     {
-        thread = std::thread{func,
-                             std::ref(output_vector),
-                             std::cref(input_vector),
-                             thread_offset*thread_index++,
-                             stride};
+        threads[thread_index] = std::thread{func,
+                                            std::ref(output_vector),
+                                            std::cref(input_vector),
+                                            thread_offset*thread_index,
+                                            stride};
     }
     // join threads
     for (auto thread& : threads)
