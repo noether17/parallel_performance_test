@@ -4,10 +4,11 @@ namespace AT
 {
 auto element_wise_addition(std::vector<data_type>& output_vector,
                            const std::vector<data_type>& input_vector,
-                           int thread_start,
+                           int thread_begin,
+                           int thread_end,
                            int stride)
 {
-    for (int i = thread_start; i < input_vector.size(); i += stride)
+    for (int i = thread_begin; i < thread_end; i += stride)
     {
         output_vector[i] += input_vector[i];
     }
@@ -15,10 +16,11 @@ auto element_wise_addition(std::vector<data_type>& output_vector,
 
 auto element_wise_multiplication(std::vector<data_type>& output_vector,
                                  const std::vector<data_type>& input_vector,
-                                 int thread_start,
+                                 int thread_begin,
+                                 int thread_end,
                                  int stride)
 {
-    for (int i = thread_start; i < input_vector.size(); i += stride)
+    for (int i = thread_begin; i < thread_end; i += stride)
     {
         output_vector[i] *= input_vector[i];
     }
@@ -27,6 +29,7 @@ auto element_wise_multiplication(std::vector<data_type>& output_vector,
 auto parse_algorithm(Algorithm alg)
     -> void(*)(std::vector<data_type>&,
                const std::vector<data_type>&,
+               int,
                int,
                int)
 {
@@ -37,6 +40,23 @@ auto parse_algorithm(Algorithm alg)
         case Algorithm::element_wise_multiplication:
             return element_wise_multiplication;
     }
+}
+
+/* Returns tuple containing thread offset,
+ * stride between successive elements, and
+ * length of thread segment.
+ */
+auto offset_stride_length(int array_size,
+                          int parallelism,
+                          MemoryAccess access)
+                          -> std::tuple<int, int, int>
+{
+    auto max_ops_per_thread = (array_size + parallelism - 1) / parallelism;
+    if (access == MemoryAccess::interleaved)
+    {
+        return make_tuple(1, parallelism, parallelism*max_ops_per_thread);
+    }
+    return make_tuple(max_ops_per_thread, 1, max_ops_per_thread);
 }
 
 auto test_performance(Algorithm alg,
@@ -67,19 +87,22 @@ auto test_performance(Algorithm alg,
     // create vector of threads
     auto threads = std::vector<std::thread>(parallelism);
 
-    // set thread boundary parameters
-    auto thread_offset = array_size / parallelism; // depends on access
-    auto stride = 1; // depends on access
-
+    // set boundary parameters
+    auto [thread_offset, stride, thread_length]
+        = offset_stride_length(array_size, parallelism, access);
     // start timer
     auto start = std::chrono::high_resolution_clock::now();
     // start threads
     for (int thread_index = 0; thread_index < threads.size(); ++thread_index)
     {
+        // set thread boundaries
+        auto thread_begin = thread_offset*thread_index;
+        auto thread_end   = min(array_size, thread_begin + thread_length);
         threads[thread_index] = std::thread{func,
                                             std::ref(output_vector),
                                             std::cref(input_vector),
-                                            thread_offset*thread_index,
+                                            thread_begin,
+                                            thread_end,
                                             stride};
     }
     // join threads
