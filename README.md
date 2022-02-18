@@ -2,7 +2,7 @@
 This repository is for testing the multithreaded performance of parallelizable algorithms on different hardware, and exploring the various factors that can affect performance.
 
 # Testing Parameters
-To get a good sense of how different variables can affect performance, a wide variety of tests must be conducted. These tests will employ algorithms of various complexities, a wide range of array sizes, multiple types of processors (both CPUs and GPUs), and different attempts at hardware optimization (and de-optimization).
+To get a good sense of how different variables can affect performance, a wide variety of tests must be conducted. These tests will employ algorithms of various complexities, a wide range of array sizes, multiple types of processors (both CPUs and GPUs), and different attempts at hardware optimization (and pessimization).
 
 ## Algorithms
 Element-wise addition

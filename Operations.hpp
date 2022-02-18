@@ -1,3 +1,5 @@
+#include "MappingPolicy.hpp"
+#include <thread>
 #include <vector>
 
 namespace PPT
@@ -7,6 +9,7 @@ namespace PPT
     template <typename T>
     using v_citer = std::vector<T>::const_iterator;
 
+    /*
     // Abstract Operations
     // these provide interfaces establishing the input/output
     // requirements of each operation
@@ -66,16 +69,22 @@ namespace PPT
         virtual ~Reduction() = 0;
         virtual auto operator()(std::vector<WorkSegment>&) -> void = 0;
     };
+    */
 
     // Concrete Operations
     template <typename T>
-    class ElementWiseAddition : public Combination
+    class ElementWiseAddition
     {
-        virtual ~ElementWiseAddition() override {}
-        virtual auto operator()(T a, T b) override -> void { return a + b; }
-        virtual auto operator()(std::vector<WorkSegment>& task) override -> void
-        {
-            // TODO
-        }
+    public:
+        ElementWiseAddition(int size, int n_threads)
+            : data_{size},
+              threads_(n_threads)
+        {}
+
+        auto operator() -> void;
+
+    private:
+        CombinationMapping<T> data_{};
+        std::vector<std::thread> threads_{};
     };
 } // namespace PPT
