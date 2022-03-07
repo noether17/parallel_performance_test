@@ -1,8 +1,10 @@
 #include <algorithm>
 #include <chrono>
+#include <concepts>
 #include <cmath>
 #include <iostream>
 #include <numeric>
+#include <ranges>
 #include <thread>
 #include <vector>
 
@@ -16,15 +18,17 @@ auto get_array_sizes(int n_sizes) -> std::vector<int>;
 template <typename DataType>
 auto generate_input(int max_size) -> std::vector<DataType>;
 
-template <typename CallableType>
-auto measure_execution_time(CallableType f, int array_size) -> ns;
+template <typename Combination>
+requires std::invocable<Combination&, data_type, data_type>
+auto measure_execution_time(Combination f, int array_size) -> ns;
 
-template <typename CallableType>
-auto generate_performance_profile(CallableType f, int number_of_array_sizes) -> std::vector<ns>;
+template <typename Combination>
+requires std::invocable<Combination&, data_type, data_type>
+auto generate_performance_profile(Combination f, int number_of_array_sizes) -> std::vector<ns>;
 
 int main()
 {
-    generate_performance_profile([](auto value){return value*value;}, number_of_array_sizes);
+    generate_performance_profile([](auto a, auto b){return a*b;}, number_of_array_sizes);
     return 0;
 }
 
@@ -45,8 +49,9 @@ auto generate_input(int max_size) -> std::vector<DataType>
     return input_values;
 }
 
-template <typename CallableType>
-auto measure_execution_time(CallableType f, int array_size) -> ns
+template <typename Combination>
+requires std::invocable<Combination&, data_type, data_type>
+auto measure_execution_time(Combination f, int array_size) -> ns
 {
     auto input_values = generate_input<data_type>(array_size);
     auto output_values = std::vector<data_type>(array_size);
@@ -58,7 +63,7 @@ auto measure_execution_time(CallableType f, int array_size) -> ns
     for (auto i = 0; i < array_size; ++i)
     {
         auto value = input_values.at(i);
-        output_values.emplace_back(f(value));
+        output_values.emplace_back(f(value, value));
     }
 
     // stop timer
@@ -66,8 +71,9 @@ auto measure_execution_time(CallableType f, int array_size) -> ns
     return end - start;
 }
 
-template <typename CallableType>
-auto generate_performance_profile(CallableType f, int number_of_array_sizes) -> std::vector<ns>
+template <typename Combination>
+requires std::invocable<Combination&, data_type, data_type>
+auto generate_performance_profile(Combination f, int number_of_array_sizes) -> std::vector<ns>
 {
     auto array_sizes = get_array_sizes(number_of_array_sizes);
     auto execution_times = std::vector<ns>();
