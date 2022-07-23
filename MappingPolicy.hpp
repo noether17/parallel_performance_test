@@ -1,8 +1,15 @@
-#include <thread>
-#include <vector>
-
 namespace PPT
 {
+    // A Combination takes two inputs of the same type and returns an
+    // output of that type.
+    template <typename T>
+    struct Combination
+    {
+        T input_a;
+        T input_b;
+        T output;
+    };
+    /*
     template <typename T>
     using v_iter = std::vector<T>::iterator;
     template <typename T>
@@ -48,4 +55,5 @@ namespace PPT
         std::vector<T> output_{};
         std::vector<Worker> workers_{};
     };
+    */
 } // namespace PPT
